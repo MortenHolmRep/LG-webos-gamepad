@@ -21,7 +21,8 @@
       tap((data) => {
         pairables = (data["devices"] as Device[])
           .filter((d) => d.paired === false)
-          .filter((d) => !!d.name);
+          .filter((d) => !!d.name)
+          .filter((d) => d.name.toLowerCase().includes("xbox") || d.class === 1344);
       })
     )
     .subscribe();
@@ -54,6 +55,12 @@
   async function pair(device: Device) {
     targetDevice = device;
     step = Step.WaitingOn;
+
+    try {
+      await bluetoothService.deviceSpecificOperation(device);
+    } catch (error) {
+      console.error('Error in device-specific operation:', error);
+    }
 
     const pairing = bluetoothService
       .subscription<Bluetooth2AdapterPairSubscription>("adapter/pair", {
